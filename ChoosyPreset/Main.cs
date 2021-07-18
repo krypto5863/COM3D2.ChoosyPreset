@@ -46,12 +46,14 @@ namespace ChoosyPreset
 			{
 				UI.ButtonsMPN[s] = true;
 
-
+#if DEBUG
 				var KeyVal = UI.Categories.FirstOrDefault(kv => kv.Value.Contains(s.ToLower())).Key;
 				if (KeyVal == null)
 				{
+
 					Main.logger.LogWarning($"{s} falls out of simple scope...");
 				}
+#endif
 			}
 			foreach (string s in Enum.GetNames(typeof(MaidParts.PARTS_COLOR)))
 			{
