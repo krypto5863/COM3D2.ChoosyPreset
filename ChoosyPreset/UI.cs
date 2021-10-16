@@ -8,7 +8,7 @@ namespace ChoosyPreset
 {
 	class UI
 	{
-		private static readonly int WindowID = 777777;
+		private static readonly int WindowID = 387462387;
 		private static Vector2 scrollPosition = Vector2.zero;
 
 		private static Rect windowRect = new Rect(Screen.width / 1.3f, Screen.height / 4, Screen.width / 7f, Screen.height / 2f);
