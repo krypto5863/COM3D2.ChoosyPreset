@@ -17,7 +17,7 @@ using UnityEngine;
 namespace ChoosyPreset
 {
 	//This is the metadata set for your plugin.
-	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "1.0")]
+	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "1.1")]
 	public class Main : BaseUnityPlugin
 	{
 		//static saving of the main instance. This makes it easier to run stuff like coroutines from static methods or accessing non-static vars.
