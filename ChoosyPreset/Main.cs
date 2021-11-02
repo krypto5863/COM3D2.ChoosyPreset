@@ -2,12 +2,19 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Security;
 using System.Security.Permissions;
 using System.Text;
+using System.Threading;
 using UnityEngine;
 
 //These two lines tell your plugin to not give a flying fuck about accessing private variables/classes whatever. It requires a publicized stubb of the library with those private objects though.
@@ -28,8 +35,11 @@ namespace ChoosyPreset
 
 		//Config entry variable. You set your configs to this.
 		internal static ConfigEntry<bool> AdvancedMode;
+		internal static ConfigEntry<string> LanguageFile;
 		public static bool PresetPanelOpen { get; private set; }
 		public static bool ViewMode { get; private set; }
+
+		internal static Dictionary<string, string> Translations;
 
 		private void Awake()
 		{
@@ -39,13 +49,25 @@ namespace ChoosyPreset
 			//pushes the logger to a public static var so you can use the bepinex logger from other classes.
 			logger = Logger;
 
+			if (!Directory.Exists(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset"))
+			{
+				Directory.CreateDirectory(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset");
+			}
+
 			//Binds the configuration. In other words it sets your ConfigEntry var to your config setup.
 			AdvancedMode = Config.Bind("General", "Advanced Mode", false, "This mode lets you switch individual slots for your items. It's way more confusing than simple mode.");
+
+			AcceptableValueList<string> translationFile = new AcceptableValueList<string>(Directory.GetFiles(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\", "*.json").Select(file => Path.GetFileName(file)).ToArray());
+
+			LanguageFile = Config.Bind("General", "Language File", "en_us.json", new ConfigDescription("This denotes the translation file to use in ChoosyPreset.", translationFile));
+
+			LanguageFile.SettingChanged += (e, s) => { Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value)); };
+
+			Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value));
 
 			foreach (string s in Enum.GetNames(typeof(MPN)))
 			{
 				UI.ButtonsMPN[s] = true;
-
 #if DEBUG
 				var KeyVal = UI.Categories.FirstOrDefault(kv => kv.Value.Contains(s.ToLower())).Key;
 				if (KeyVal == null)

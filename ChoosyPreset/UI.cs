@@ -50,21 +50,20 @@ namespace ChoosyPreset
 
 			scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-
 			if (Main.AdvancedMode.Value)
 			{
 				ShowAdvancedMode();
 			}
-			else 
+			else
 			{
 				ShowSimpleMode();
 			}
 
-			SkipMaidVoiceXML = GUILayout.Toggle(SkipMaidVoiceXML, "AddModsSlider Settings");
+			SkipMaidVoiceXML = GUILayout.Toggle(SkipMaidVoiceXML, Main.Translations["AddModsSlider Settings"]);
 
 			GUILayout.EndScrollView();
 
-			if (GUILayout.Button("Disable All"))
+			if (GUILayout.Button(Main.Translations["Disable All"]))
 			{
 				var keys = ButtonsMPN.Keys.ToArray();
 
@@ -89,7 +88,7 @@ namespace ChoosyPreset
 
 				SkipMaidVoiceXML = false;
 			}
-			if (GUILayout.Button("Enable All"))
+			if (GUILayout.Button(Main.Translations["Enable All"]))
 			{
 				var keys = ButtonsMPN.Keys.ToArray();
 
@@ -115,7 +114,7 @@ namespace ChoosyPreset
 				SkipMaidVoiceXML = true;
 			}
 
-			Main.AdvancedMode.Value = GUILayout.Toggle(Main.AdvancedMode.Value, "Advanced Mode");
+			Main.AdvancedMode.Value = GUILayout.Toggle(Main.AdvancedMode.Value , Main.Translations["Advanced Mode"]);
 
 			ChkMouseClick(windowRect);
 		}
@@ -123,7 +122,7 @@ namespace ChoosyPreset
 		{
 			foreach (string s in UI.Categories.Keys) 
 			{
-				SimpleModeToggles[s] = GUILayout.Toggle(SimpleModeToggles[s], s);
+				SimpleModeToggles[s] = GUILayout.Toggle(SimpleModeToggles[s], Main.Translations[s]);
 			}
 		}
 		internal static void ShowAdvancedMode() 
@@ -132,13 +131,13 @@ namespace ChoosyPreset
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			GUILayout.Label("Slots");
+			GUILayout.Label(Main.Translations["Slots"]);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
 			foreach (string s in Enum.GetNames(typeof(MPN)))
 			{
-				ButtonsMPN[s] = GUILayout.Toggle(ButtonsMPN[s], s);
+				ButtonsMPN[s] = GUILayout.Toggle(ButtonsMPN[s], Main.Translations[s]);
 			}
 
 			GUILayout.EndVertical();
@@ -146,13 +145,13 @@ namespace ChoosyPreset
 
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
-			GUILayout.Label("Colors");
+			GUILayout.Label(Main.Translations["Colors"]);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
 			foreach (string s in Enum.GetNames(typeof(MaidParts.PARTS_COLOR)))
 			{
-				ColorParts[(MaidParts.PARTS_COLOR)Enum.Parse(typeof(MaidParts.PARTS_COLOR), s)] = GUILayout.Toggle(ColorParts[(MaidParts.PARTS_COLOR)Enum.Parse(typeof(MaidParts.PARTS_COLOR), s)], s);
+				ColorParts[(MaidParts.PARTS_COLOR)Enum.Parse(typeof(MaidParts.PARTS_COLOR), s)] = GUILayout.Toggle(ColorParts[(MaidParts.PARTS_COLOR)Enum.Parse(typeof(MaidParts.PARTS_COLOR), s)], Main.Translations[s]);
 			}
 
 			GUILayout.EndVertical();
