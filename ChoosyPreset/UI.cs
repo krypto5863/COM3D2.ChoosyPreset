@@ -18,6 +18,10 @@ namespace ChoosyPreset
 
 		internal static Dictionary<string, bool> SimpleModeToggles = new Dictionary<string, bool>();
 
+		internal static Dictionary<string, Dictionary<string, bool>> Presets = new Dictionary<string, Dictionary<string,bool>>();
+
+		internal static bool ShowLoadPresetMenu = false;
+
 		internal static readonly Dictionary<string, string[]> Categories = new Dictionary<string, string[]> 
 		{ 
 			{"Clothes", new string[]{"wear","skirt","mizugi","bra","panz","stkg","shoes","headset","onepiece", "acchat"} },
@@ -50,7 +54,14 @@ namespace ChoosyPreset
 
 			scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-			if (Main.AdvancedMode.Value)
+			if (ShowLoadPresetMenu) 
+			{
+				ShowLoadPresets();
+				GUILayout.EndScrollView();
+				ChkMouseClick(windowRect);
+				return;
+			}
+			else if (Main.AdvancedMode.Value)
 			{
 				ShowAdvancedMode();
 			}
@@ -127,6 +138,16 @@ namespace ChoosyPreset
 		}
 		internal static void ShowAdvancedMode() 
 		{
+
+			if (GUILayout.Button("Load"))	
+			{
+
+			}
+
+			if (GUILayout.Button("Save"))
+			{
+			}
+
 			GUILayout.BeginVertical();
 
 			GUILayout.BeginHorizontal();
@@ -156,8 +177,21 @@ namespace ChoosyPreset
 
 			GUILayout.EndVertical();
 		}
-
-
+		public static void ShowLoadPresets() 
+		{
+			if (GUILayout.Button("None"))
+			{
+				ShowLoadPresetMenu = false;
+			}
+			foreach (string s in Presets.Keys) 
+			{
+				if (GUILayout.Button(s))
+				{
+					ButtonsMPN = Presets[s];
+					ShowLoadPresetMenu = false;
+				}
+			}
+		}
 		public static void ChkMouseClick(Rect windowRect)
 		{
 			if ((Input.mouseScrollDelta.y != 0 || Input.GetMouseButtonUp(0)) && IsMouseOnGUI(windowRect))

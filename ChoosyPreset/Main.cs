@@ -54,12 +54,20 @@ namespace ChoosyPreset
 				Directory.CreateDirectory(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset");
 			}
 
+			AcceptableValueList<string> translationFiles = new AcceptableValueList<string>(Directory.GetFiles(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\", "*.*").Where(s => s.ToLower().EndsWith(".json")).Select(file => Path.GetFileName(file)).ToArray());
+
+			if (translationFiles.AcceptableValues.Count() < 0)
+			{
+				logger.LogFatal("It seems we're lacking any translation files for ChoosyPreset! This is bad and we can't start without them! Please download the translation files, they come with the plugin, and place them in the proper directory!");
+
+				return;
+			}
+
+
 			//Binds the configuration. In other words it sets your ConfigEntry var to your config setup.
 			AdvancedMode = Config.Bind("General", "Advanced Mode", false, "This mode lets you switch individual slots for your items. It's way more confusing than simple mode.");
 
-			AcceptableValueList<string> translationFile = new AcceptableValueList<string>(Directory.GetFiles(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\", "*.json").Select(file => Path.GetFileName(file)).ToArray());
-
-			LanguageFile = Config.Bind("General", "Language File", "en_us.json", new ConfigDescription("This denotes the translation file to use in ChoosyPreset.", translationFile));
+			LanguageFile = Config.Bind("General", "Language File", "english.json", new ConfigDescription("This denotes the translation file to use in ChoosyPreset.", translationFiles));
 
 			LanguageFile.SettingChanged += (e, s) => { Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value)); };
 
