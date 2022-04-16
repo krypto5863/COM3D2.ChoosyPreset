@@ -18,12 +18,12 @@ namespace ChoosyPreset
 
 		internal static Dictionary<string, bool> SimpleModeToggles = new Dictionary<string, bool>();
 
-		internal static Dictionary<string, Dictionary<string, bool>> Presets = new Dictionary<string, Dictionary<string,bool>>();
+		internal static Dictionary<string, Dictionary<string, bool>> Presets = new Dictionary<string, Dictionary<string, bool>>();
 
 		internal static bool ShowLoadPresetMenu = false;
 
-		internal static readonly Dictionary<string, string[]> Categories = new Dictionary<string, string[]> 
-		{ 
+		internal static readonly Dictionary<string, string[]> Categories = new Dictionary<string, string[]>
+		{
 			{"Clothes", new string[]{"wear","skirt","mizugi","bra","panz","stkg","shoes","headset","onepiece", "acchat"} },
 
 			{"Accesories", new string[]{"accha","acchana","acckamisub","acckami","accmimi","accnip","acckubi","acckubiwa","accheso", "accude", "accude", "accashi", "accsenaka", "accshippo", "accanl", "accvag", "megane", "accxxx", "acchead", "glove" } },
@@ -43,7 +43,7 @@ namespace ChoosyPreset
 
 		internal static bool SkipMaidVoiceXML = true;
 
-		public static void ShowUI() 
+		public static void ShowUI()
 		{
 			windowRect = GUILayout.Window(WindowID, windowRect, GuiWindowControls, "ChoosyPreset");
 		}
@@ -54,7 +54,7 @@ namespace ChoosyPreset
 
 			scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-			if (ShowLoadPresetMenu) 
+			if (ShowLoadPresetMenu)
 			{
 				ShowLoadPresets();
 				GUILayout.EndScrollView();
@@ -125,23 +125,21 @@ namespace ChoosyPreset
 				SkipMaidVoiceXML = true;
 			}
 
-			Main.AdvancedMode.Value = GUILayout.Toggle(Main.AdvancedMode.Value , Main.Translations["Advanced Mode"]);
+			Main.AdvancedMode.Value = GUILayout.Toggle(Main.AdvancedMode.Value, Main.Translations["Advanced Mode"]);
 
 			ChkMouseClick(windowRect);
 		}
-		internal static void ShowSimpleMode() 
+		internal static void ShowSimpleMode()
 		{
-			foreach (string s in UI.Categories.Keys) 
+			foreach (string s in UI.Categories.Keys)
 			{
 				SimpleModeToggles[s] = GUILayout.Toggle(SimpleModeToggles[s], Main.Translations[s]);
 			}
 		}
-		internal static void ShowAdvancedMode() 
+		internal static void ShowAdvancedMode()
 		{
-
-			if (GUILayout.Button("Load"))	
+			if (GUILayout.Button("Load"))
 			{
-
 			}
 
 			if (GUILayout.Button("Save"))
@@ -177,13 +175,13 @@ namespace ChoosyPreset
 
 			GUILayout.EndVertical();
 		}
-		public static void ShowLoadPresets() 
+		public static void ShowLoadPresets()
 		{
 			if (GUILayout.Button("None"))
 			{
 				ShowLoadPresetMenu = false;
 			}
-			foreach (string s in Presets.Keys) 
+			foreach (string s in Presets.Keys)
 			{
 				if (GUILayout.Button(s))
 				{

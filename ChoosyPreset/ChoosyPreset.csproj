@@ -58,14 +58,26 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Desktop\Game Related Files\Meido Related Stuff\Meido Assemblies\COM Assemblies\GameOriginal 2.7.0\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\Desktop\Game Related Files\Meido Related Stuff\Meido Assemblies\COM Assemblies\GameOriginal 2.9.0\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UniverseLib.Mono, Version=1.3.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UniverseLib.Mono.1.3.3\lib\net35\UniverseLib.Mono.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ItemStates.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="ParentChildToggle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI.cs" />
+    <None Include="Translations\espanol.json" />
+    <None Include="Translations\spaghetti%28italian%29.json" />
+    <None Include="UI.cs" />
+    <Compile Include="UniverseLibUI.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Translations\english.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -4,18 +4,12 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Resources;
 using System.Security;
 using System.Security.Permissions;
-using System.Text;
-using System.Threading;
-using UnityEngine;
+using UniverseLib.UI;
 
 //These two lines tell your plugin to not give a flying fuck about accessing private variables/classes whatever. It requires a publicized stubb of the library with those private objects though.
 [module: UnverifiableCode]
@@ -25,6 +19,7 @@ namespace ChoosyPreset
 {
 	//This is the metadata set for your plugin.
 	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "1.1")]
+	[BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
 	public class Main : BaseUnityPlugin
 	{
 		//static saving of the main instance. This makes it easier to run stuff like coroutines from static methods or accessing non-static vars.
@@ -34,12 +29,15 @@ namespace ChoosyPreset
 		public static ManualLogSource logger;
 
 		//Config entry variable. You set your configs to this.
-		internal static ConfigEntry<bool> AdvancedMode;
 		internal static ConfigEntry<string> LanguageFile;
+
 		public static bool PresetPanelOpen { get; private set; }
 		public static bool ViewMode { get; private set; }
 
 		internal static Dictionary<string, string> Translations;
+
+		internal static UIBase uIBase;
+		internal static MyGUI myGUI;
 
 		private void Awake()
 		{
@@ -56,84 +54,87 @@ namespace ChoosyPreset
 
 			AcceptableValueList<string> translationFiles = new AcceptableValueList<string>(Directory.GetFiles(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\", "*.*").Where(s => s.ToLower().EndsWith(".json")).Select(file => Path.GetFileName(file)).ToArray());
 
-			if (translationFiles.AcceptableValues.Count() < 0)
+			if (translationFiles.AcceptableValues.Count() <= 0)
 			{
 				logger.LogFatal("It seems we're lacking any translation files for ChoosyPreset! This is bad and we can't start without them! Please download the translation files, they come with the plugin, and place them in the proper directory!");
 
 				return;
 			}
 
-
-			//Binds the configuration. In other words it sets your ConfigEntry var to your config setup.
-			AdvancedMode = Config.Bind("General", "Advanced Mode", false, "This mode lets you switch individual slots for your items. It's way more confusing than simple mode.");
-
 			LanguageFile = Config.Bind("General", "Language File", "english.json", new ConfigDescription("This denotes the translation file to use in ChoosyPreset.", translationFiles));
 
-			LanguageFile.SettingChanged += (e, s) => { Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value)); };
+			LanguageFile.SettingChanged += (e, s) =>
+			{
+				Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value));
+
+				myGUI.UpdateTranslations();
+			};
 
 			Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value));
 
-			foreach (string s in Enum.GetNames(typeof(MPN)))
-			{
-				UI.ButtonsMPN[s] = true;
-#if DEBUG
-				var KeyVal = UI.Categories.FirstOrDefault(kv => kv.Value.Contains(s.ToLower())).Key;
-				if (KeyVal == null)
-				{
+			var UniLibConfig = new UniverseLib.Config.UniverseLibConfig() { Force_Unlock_Mouse = true };
 
-					Main.logger.LogWarning($"{s} falls out of simple scope...");
-				}
-#endif
-			}
-			foreach (string s in Enum.GetNames(typeof(MaidParts.PARTS_COLOR)))
-			{
-				UI.ColorParts[(MaidParts.PARTS_COLOR)Enum.Parse(typeof(MaidParts.PARTS_COLOR), s)] = true;
-			}
-
-			foreach (string key in UI.Categories.Keys)
-			{
-				UI.SimpleModeToggles[key] = true;
-			}
+			UniverseLib.Universe.Init(0f, UniverseLib_Init, null, UniLibConfig);
 
 			//Installs the patches in the Main class.
 			Harmony.CreateAndPatchAll(typeof(Main));
 		}
 
-		private void OnGUI()
+		private void UniverseLib_Init()
 		{
-			if (PresetPanelOpen && !ViewMode)
-			{
-				UI.ShowUI();
-			}
+			uIBase = UniversalUI.RegisterUI("ChoosyPresetUI", null);
+			myGUI = new MyGUI(uIBase);
+			myGUI.Enabled = false;
 		}
 
 		[HarmonyPatch(typeof(PresetMgr), "OpenPresetPanel")]
 		[HarmonyPatch(typeof(PresetMgr), "ClosePresetPanel")]
 		[HarmonyPostfix]
-		static void PresetPanelStatusChanged(ref PresetMgr __instance)
+		private static void PresetPanelStatusChanged(ref PresetMgr __instance)
 		{
 			PresetPanelOpen = __instance.m_goPresetPanel.activeSelf;
+
+			if (PresetPanelOpen && ViewMode == false)
+			{
+				myGUI.Enabled = true;
+			}
+			else
+			{
+				myGUI.Enabled = false;
+			}
 		}
 
 		[HarmonyPatch(typeof(SceneEdit), "FromView")]
 		[HarmonyPostfix]
-		static void FromView()
+		private static void FromView()
 		{
 			ViewMode = false;
+
+			if (PresetPanelOpen)
+			{
+				myGUI.Enabled = true;
+			}
+			else
+			{
+				myGUI.Enabled = false;
+			}
 		}
+
 		[HarmonyPatch(typeof(SceneEdit), "ToView")]
 		[HarmonyPostfix]
-		static void ToView()
+		private static void ToView()
 		{
 			ViewMode = true;
+			myGUI.Enabled = false;
 		}
 
 		[HarmonyPatch(typeof(SceneEdit), "OnDestroy")]
 		[HarmonyPrefix]
-		static void ExitingEditMode()
+		private static void ExitingEditMode()
 		{
 			PresetPanelOpen = false;
 			ViewMode = false;
+			myGUI.Enabled = false;
 		}
 
 		private static Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor> MaidColorsToKeepDic;
@@ -146,78 +147,39 @@ namespace ChoosyPreset
 			MaidColorsToKeepDic = new Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor>();
 			listofProps = new List<MaidProp>(__1.listMprop);
 
-			if (AdvancedMode.Value)
+			var props = __1.listMprop.ToArray();
+
+			if (__1.aryPartsColor != null)
 			{
-				var props = __1.listMprop.ToArray();
-
-				if (__1.aryPartsColor != null)
+				for (int k = 0; k < __1.aryPartsColor.Length; k++)
 				{
-					for (int k = 0; k < __1.aryPartsColor.Length; k++)
+					var colorName = Enum.GetName(typeof(MaidParts.PARTS_COLOR), k);
+
+					if (!myGUI.State.MPNStates[colorName])
 					{
-						if (!UI.ColorParts[(MaidParts.PARTS_COLOR)k])
-						{
-							MaidColorsToKeepDic[(MaidParts.PARTS_COLOR)k] = __0.Parts.GetPartsColor((MaidParts.PARTS_COLOR)k);
-						}
-					}
-				}
-
-				foreach (MaidProp part in props)
-				{
-					var MPN = (MPN)part.idx;
-
-					if (!UI.ButtonsMPN[MPN.ToString()])
-					{
-						__1.listMprop.Remove(part);
-					}
-				}
-			}
-			else
-			{
-				var props = __1.listMprop.ToArray();
-
-				if (__1.aryPartsColor != null)
-				{
-					for (int k = 0; k < __1.aryPartsColor.Length; k++)
-					{
-						string PartsColor = ((MaidParts.PARTS_COLOR)k).ToString();
-
-						var KeyVal = UI.Categories.FirstOrDefault(kv => kv.Value.Contains(PartsColor.ToLower())).Key;
-
-						if (KeyVal != null && !UI.SimpleModeToggles[KeyVal])
-						{
-							MaidColorsToKeepDic[(MaidParts.PARTS_COLOR)k] = __0.Parts.GetPartsColor((MaidParts.PARTS_COLOR)k);
-						}
-					}
-				}
-
-				foreach (MaidProp part in props)
-				{
-					var MPN = ((MPN)part.idx).ToString();
-
-					var KeyVal = UI.Categories.FirstOrDefault(kv => kv.Value.Contains(MPN.ToLower())).Key;
-
-#if DEBUG
-					Main.logger.LogDebug($"Logger returned: {KeyVal} for MPN {MPN}");
-#endif
-
-					if (KeyVal != null && !UI.SimpleModeToggles[KeyVal])
-					{
-#if DEBUG
-						Main.logger.LogDebug($"Removing item in slot: {MPN} because category {KeyVal} is disabled and contains this slot...");
-#endif
-
-						__1.listMprop.Remove(part);
+						MaidColorsToKeepDic[(MaidParts.PARTS_COLOR)k] = __0.Parts.GetPartsColor((MaidParts.PARTS_COLOR)k);
 					}
 				}
 			}
 
-			if (!UI.SkipMaidVoiceXML)
+			foreach (MaidProp part in props)
+			{
+				var MPN = (MPN)part.idx;
+
+				if (!myGUI.State.MPNStates[MPN.ToString()])
+				{
+					__1.listMprop.Remove(part);
+				}
+			}
+
+			if (!myGUI.State.MPNStates["AddModsSlider Settings"])
 			{
 				__1.strFileName = "";
 			}
 
 			return true;
 		}
+
 		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", new Type[] { typeof(Maid), typeof(CharacterMgr.Preset) })]
 		[HarmonyPostfix]
 		private static void PresetColorFix(Maid __0, ref CharacterMgr.Preset __1)
