@@ -3,6 +3,8 @@ A plugin that allows you to selectively load parts of presets.
 
 As it says on the tin. You simply open your preset panel and the menu will open with it. You'll notice there are two modes, simple and advanced. Simple is usually what you want. This plugin has been updated using UniverseLib! The UI is now much improved.
 
+✨ UI powered by [UniverseLib](https://github.com/sinai-dev/UniverseLib)
+
 ## Making your own Translations! ##
 1. Navigate to the `RootGameFolder/BepinEx/Config/ChoosyPreset` folder. Copy any of the language files and rename it to your language of choice. Naming does not need to be standard except for the `.json` extension.
 2. Begin Translating. The translations are ordered as `"KEY": "Translated Text",`. Do not change the key! Furthermore, don't delete keys either. Translations files are encoded in unicode!
