@@ -1,7 +1,7 @@
 # COM3D2.ChoosyPreset
 A plugin that allows you to selectively load parts of presets.
 
-As it says on the tin. You simply open your preset panel and the menu will open with it. You'll notice there are two modes, simple and advanced. Simple is usually what you want. This plugin has been updated using UniverseLib! The UI is now much improved.
+As it says on the tin. You simply open your preset panel and the menu will open with it. You'll notice there are two modes, simple and advanced. Simple is usually what you want. The UI is now much improved.
 
 ✨ UI powered by [UniverseLib](https://github.com/sinai-dev/UniverseLib)
 
