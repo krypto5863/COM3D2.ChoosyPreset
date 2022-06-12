@@ -18,7 +18,7 @@ using UniverseLib.UI;
 namespace ChoosyPreset
 {
 	//This is the metadata set for your plugin.
-	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "2.0")]
+	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "2.1")]
 	[BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
 	public class Main : BaseUnityPlugin
 	{
