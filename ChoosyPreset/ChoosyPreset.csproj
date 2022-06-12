@@ -80,8 +80,8 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\COM3D2.GameLibs.2.13.0-r.0\lib\net35\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="UniverseLib.Mono, Version=1.3.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UniverseLib.Mono.1.3.3\lib\net35\UniverseLib.Mono.dll</HintPath>
+    <Reference Include="UniverseLib.Mono, Version=1.4.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UniverseLib.Mono.1.4.3\lib\net35\UniverseLib.Mono.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
