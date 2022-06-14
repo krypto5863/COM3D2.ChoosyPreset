@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Permissions;
+using UnityEngine;
 using UniverseLib.UI;
 
 //These two lines tell your plugin to not give a flying fuck about accessing private variables/classes whatever. It requires a publicized stubb of the library with those private objects though.
@@ -77,9 +78,9 @@ namespace ChoosyPreset
 
 			Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value));
 
-			var UniLibConfig = new UniverseLib.Config.UniverseLibConfig() { Force_Unlock_Mouse = true };
+			var UniLibConfig = new UniverseLib.Config.UniverseLibConfig() { Force_Unlock_Mouse = true, Allow_UI_Selection_Outside_UIBase = true };
 
-			UniverseLib.Universe.Init(1f, UniverseLib_Init, null, UniLibConfig);
+			UniverseLib.Universe.Init(1f, UniverseLib_Init, LogHandler, UniLibConfig);
 
 			//Installs the patches in the Main class.
 			Harmony.CreateAndPatchAll(typeof(Main));
@@ -90,6 +91,26 @@ namespace ChoosyPreset
 			uIBase = UniversalUI.RegisterUI("ChoosyPresetUI", null);
 			myGUI = new MyGUI(uIBase);
 			myGUI.Enabled = false;
+		}
+		private static void LogHandler(string log, LogType logType)
+		{
+
+			return;
+
+			switch (logType)
+			{
+				case LogType.Log:
+					logger.LogMessage(log);
+					return;
+				case LogType.Warning:
+				case LogType.Assert:
+					logger.LogWarning(log);
+					return;
+				case LogType.Error:
+				case LogType.Exception:
+					logger.LogError(log);
+					return;
+			}
 		}
 
 		[HarmonyPatch(typeof(PresetMgr), "OpenPresetPanel")]
@@ -149,6 +170,11 @@ namespace ChoosyPreset
 		[HarmonyPrefix]
 		private static bool PresetSet(Maid __0, ref CharacterMgr.Preset __1)
 		{
+			if (PresetPanelOpen == false) 
+			{
+				return true;
+			}
+
 			MaidColorsToKeepDic.Clear();
 			listofProps = new List<MaidProp>(__1.listMprop);
 
@@ -189,6 +215,11 @@ namespace ChoosyPreset
 		[HarmonyPostfix]
 		private static void PresetColorFix(Maid __0, ref CharacterMgr.Preset __1)
 		{
+			if (PresetPanelOpen == false)
+			{
+				return;
+			}
+
 			foreach (KeyValuePair<MaidParts.PARTS_COLOR, MaidParts.PartsColor> keyValue in MaidColorsToKeepDic)
 			{
 				__0.Parts.SetPartsColor(keyValue.Key, keyValue.Value);
