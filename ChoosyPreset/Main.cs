@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Permissions;
+using UnityEngine;
 using UniverseLib.UI;
 
 //These two lines tell your plugin to not give a flying fuck about accessing private variables/classes whatever. It requires a publicized stubb of the library with those private objects though.
@@ -18,7 +19,7 @@ using UniverseLib.UI;
 namespace ChoosyPreset
 {
 	//This is the metadata set for your plugin.
-	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "1.1")]
+	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "2.1")]
 	[BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
 	public class Main : BaseUnityPlugin
 	{
@@ -52,16 +53,21 @@ namespace ChoosyPreset
 				Directory.CreateDirectory(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset");
 			}
 
-			AcceptableValueList<string> translationFiles = new AcceptableValueList<string>(Directory.GetFiles(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\", "*.*").Where(s => s.ToLower().EndsWith(".json")).Select(file => Path.GetFileName(file)).ToArray());
+			var translationFiles = Directory.GetFiles(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\", "*.*")
+				.Where(s => s.ToLower().EndsWith(".json"))
+				.Select(file => Path.GetFileName(file))
+				.ToArray();
 
-			if (translationFiles.AcceptableValues.Count() <= 0)
+			if (translationFiles.Count() <= 0)
 			{
 				logger.LogFatal("It seems we're lacking any translation files for ChoosyPreset! This is bad and we can't start without them! Please download the translation files, they come with the plugin, and place them in the proper directory!");
 
 				return;
 			}
 
-			LanguageFile = Config.Bind("General", "Language File", "english.json", new ConfigDescription("This denotes the translation file to use in ChoosyPreset.", translationFiles));
+			AcceptableValueList<string> settingTransFiles = new AcceptableValueList<string>(translationFiles);
+
+			LanguageFile = Config.Bind("General", "Language File", "english.json", new ConfigDescription("This denotes the translation file to use in ChoosyPreset.", settingTransFiles));
 
 			LanguageFile.SettingChanged += (e, s) =>
 			{
@@ -72,9 +78,9 @@ namespace ChoosyPreset
 
 			Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value));
 
-			var UniLibConfig = new UniverseLib.Config.UniverseLibConfig() { Force_Unlock_Mouse = true };
+			var UniLibConfig = new UniverseLib.Config.UniverseLibConfig() { Force_Unlock_Mouse = true, Allow_UI_Selection_Outside_UIBase = true };
 
-			UniverseLib.Universe.Init(0f, UniverseLib_Init, null, UniLibConfig);
+			UniverseLib.Universe.Init(1f, UniverseLib_Init, LogHandler, UniLibConfig);
 
 			//Installs the patches in the Main class.
 			Harmony.CreateAndPatchAll(typeof(Main));
@@ -85,6 +91,26 @@ namespace ChoosyPreset
 			uIBase = UniversalUI.RegisterUI("ChoosyPresetUI", null);
 			myGUI = new MyGUI(uIBase);
 			myGUI.Enabled = false;
+		}
+		private static void LogHandler(string log, LogType logType)
+		{
+
+			return;
+
+			switch (logType)
+			{
+				case LogType.Log:
+					logger.LogMessage(log);
+					return;
+				case LogType.Warning:
+				case LogType.Assert:
+					logger.LogWarning(log);
+					return;
+				case LogType.Error:
+				case LogType.Exception:
+					logger.LogError(log);
+					return;
+			}
 		}
 
 		[HarmonyPatch(typeof(PresetMgr), "OpenPresetPanel")]
@@ -137,14 +163,19 @@ namespace ChoosyPreset
 			myGUI.Enabled = false;
 		}
 
-		private static Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor> MaidColorsToKeepDic;
+		private static Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor> MaidColorsToKeepDic = new Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor>();
 		private static List<MaidProp> listofProps;
 
 		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", new Type[] { typeof(Maid), typeof(CharacterMgr.Preset) })]
 		[HarmonyPrefix]
 		private static bool PresetSet(Maid __0, ref CharacterMgr.Preset __1)
 		{
-			MaidColorsToKeepDic = new Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor>();
+			if (PresetPanelOpen == false) 
+			{
+				return true;
+			}
+
+			MaidColorsToKeepDic.Clear();
 			listofProps = new List<MaidProp>(__1.listMprop);
 
 			var props = __1.listMprop.ToArray();
@@ -184,6 +215,11 @@ namespace ChoosyPreset
 		[HarmonyPostfix]
 		private static void PresetColorFix(Maid __0, ref CharacterMgr.Preset __1)
 		{
+			if (PresetPanelOpen == false)
+			{
+				return;
+			}
+
 			foreach (KeyValuePair<MaidParts.PARTS_COLOR, MaidParts.PartsColor> keyValue in MaidColorsToKeepDic)
 			{
 				__0.Parts.SetPartsColor(keyValue.Key, keyValue.Value);
@@ -192,7 +228,6 @@ namespace ChoosyPreset
 			__1.listMprop = new List<MaidProp>(listofProps);
 
 			listofProps = null;
-			MaidColorsToKeepDic = null;
 		}
 	}
 }
