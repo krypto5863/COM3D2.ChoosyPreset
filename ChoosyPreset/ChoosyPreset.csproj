@@ -80,19 +80,21 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\COM3D2.GameLibs.2.13.0-r.0\lib\net35\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="UniverseLib.Mono, Version=1.4.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UniverseLib.Mono.1.4.3\lib\net35\UniverseLib.Mono.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UIElements\Helpers.cs" />
     <Compile Include="ItemStates.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="ParentChildToggle.cs" />
+    <None Include="ParentChildToggle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Translations\espanol.json" />
+    <None Include="Translations\japanese.json" />
     <None Include="Translations\spaghetti%28italian%29.json" />
-    <None Include="UI.cs" />
-    <Compile Include="UniverseLibUI.cs" />
+    <Compile Include="UIElements\IMGUIUI.cs" />
+    <None Include="Main_UniLib.cs" />
+    <None Include="UIElements\ParentChildToggle.cs" />
+    <None Include="UIElements\UniverseLibUI.cs" />
+    <None Include="UniverseLibUI.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

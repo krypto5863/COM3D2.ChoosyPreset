@@ -5,6 +5,8 @@ namespace ChoosyPreset
 {
 	public class ItemStates
 	{
+		public static ItemStates CurrentItemState;
+
 		public ItemStates()
 		{
 			foreach (string s in Enum.GetNames(typeof(MPN)))
@@ -16,6 +18,8 @@ namespace ChoosyPreset
 				MPNStates[s] = true;
 			}
 			MPNStates["AddModsSlider Settings"] = true;
+
+			CurrentItemState = this;
 		}
 
 		public Dictionary<string, bool> MPNStates = new Dictionary<string, bool>();
@@ -40,5 +44,37 @@ namespace ChoosyPreset
 
 			{"AddModsSlider Settings", new string[]{ "AddModsSlider Settings" } }
 		};
+
+		public bool IsAnyMPNOn(string category)
+		{
+			var result = false;
+
+			foreach (var MPN in Categorized[category])
+			{
+				if (MPNStates[MPN]) 
+				{
+					result = true;
+					continue;
+				}
+			}
+
+			return result;
+		}
+
+		public bool IsAnyMPNOff(string category)
+		{
+			var result = false;
+
+			foreach (var MPN in Categorized[category])
+			{
+				if (MPNStates[MPN] == false)
+				{
+					result = true;
+					continue;
+				}
+			}
+
+			return result;
+		}
 	}
 }

@@ -5,13 +5,13 @@ using UnityEngine.UI;
 using UniverseLib.UI;
 using UniverseLib.UI.Widgets;
 
-namespace ChoosyPreset
+namespace ChoosyPreset.UIElements
 {
 	public class MyGUI : UniverseLib.UI.Panels.PanelBase
 	{
 		public MyGUI(UIBase owner) : base(owner)
 		{
-			State = new ItemStates();
+			new ItemStates();
 		}
 
 		public override string Name => "ChoosyPreset";
@@ -31,7 +31,7 @@ namespace ChoosyPreset
 		private Color smokedGlass = new Color(0, 0, 0, 0.75f);
 		private Color safeClear = new Color(1f, 0, 0, 0f);
 
-		public ItemStates State { get; set; }
+		//public ItemStates State { get; set; }
 
 		public void UpdateTranslations()
 		{
@@ -182,7 +182,7 @@ namespace ChoosyPreset
 
 					ChildToggle.onValueChanged.AddListener((value) =>
 					{
-						State.MPNStates[Category] = value;
+						ItemStates.CurrentItemState.MPNStates[Category] = value;
 					});
 
 					//Link child togg to parent togg

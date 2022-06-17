@@ -10,7 +10,6 @@ using System.Linq;
 using System.Security;
 using System.Security.Permissions;
 using UnityEngine;
-using UniverseLib.UI;
 
 //These two lines tell your plugin to not give a flying fuck about accessing private variables/classes whatever. It requires a publicized stubb of the library with those private objects though.
 [module: UnverifiableCode]
@@ -19,7 +18,7 @@ using UniverseLib.UI;
 namespace ChoosyPreset
 {
 	//This is the metadata set for your plugin.
-	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "2.1")]
+	[BepInPlugin("ChoosyPreset", "ChoosyPreset", "3.0")]
 	[BepInDependency("net.perdition.com3d2.editbodyloadfix", BepInDependency.DependencyFlags.SoftDependency)]
 	public class Main : BaseUnityPlugin
 	{
@@ -31,14 +30,14 @@ namespace ChoosyPreset
 
 		//Config entry variable. You set your configs to this.
 		internal static ConfigEntry<string> LanguageFile;
+		//internal static ConfigEntry<bool> UsingUniLib;
 
 		public static bool PresetPanelOpen { get; private set; }
 		public static bool ViewMode { get; private set; }
 
 		internal static Dictionary<string, string> Translations;
 
-		internal static UIBase uIBase;
-		internal static MyGUI myGUI;
+		internal static bool UniLibInit = false;
 
 		private void Awake()
 		{
@@ -52,6 +51,36 @@ namespace ChoosyPreset
 			{
 				Directory.CreateDirectory(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset");
 			}
+
+			/*
+			UsingUniLib = Config.Bind("General", "Use UniLib (Not Recommended)", false, new ConfigDescription("Will use UniLib and a UniLib UI. UniLib has been known to cause issues, so it's suggested you keep this off."));
+
+			UsingUniLib.SettingChanged += (d, r) =>
+			{
+				try
+				{
+					if (UsingUniLib.Value == false)
+					{
+						ToggleUIState(false);
+						return;
+					}
+
+					if (Main.UniLibInit == false)
+					{
+						Type.GetType("ChoosyPreset.Main_UniLib").GetMethod("Start").Invoke(null, null);
+					}
+
+					if (PresetPanelOpen && ViewMode == false)
+					{
+						ToggleUIState(true);
+					}
+				}
+				catch (TypeLoadException t)
+				{
+					UsingUniLib.Value = false;
+				}
+			};
+			*/
 
 			var translationFiles = Directory.GetFiles(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\", "*.*")
 				.Where(s => s.ToLower().EndsWith(".json"))
@@ -72,44 +101,37 @@ namespace ChoosyPreset
 			LanguageFile.SettingChanged += (e, s) =>
 			{
 				Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value));
-
-				myGUI.UpdateTranslations();
+				/*
+				if (UsingUniLib.Value)
+				{
+					Type.GetType("ChoosyPreset.Main_UniLib").GetMethod("UpdateTranslations").Invoke(null, null);
+				}*/
 			};
 
 			Translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(BepInEx.Paths.ConfigPath + $"\\ChoosyPreset\\" + LanguageFile.Value));
-
-			var UniLibConfig = new UniverseLib.Config.UniverseLibConfig() { Force_Unlock_Mouse = true, Allow_UI_Selection_Outside_UIBase = true };
-
-			UniverseLib.Universe.Init(1f, UniverseLib_Init, LogHandler, UniLibConfig);
+			/*
+			if (UsingUniLib.Value)
+			{
+				try
+				{
+					Type.GetType("ChoosyPreset.Main_UniLib").GetMethod("Start").Invoke(null, null);
+				}
+				catch (TypeLoadException t)
+				{
+					logger.LogError("UniverseLib was removed! Reverting to default.");
+					UsingUniLib.Value = false;
+				}
+			}*/
 
 			//Installs the patches in the Main class.
 			Harmony.CreateAndPatchAll(typeof(Main));
 		}
 
-		private void UniverseLib_Init()
+		private void OnGUI()
 		{
-			uIBase = UniversalUI.RegisterUI("ChoosyPresetUI", null);
-			myGUI = new MyGUI(uIBase);
-			myGUI.Enabled = false;
-		}
-		private static void LogHandler(string log, LogType logType)
-		{
-
-			return;
-
-			switch (logType)
+			if (PresetPanelOpen && !ViewMode)
 			{
-				case LogType.Log:
-					logger.LogMessage(log);
-					return;
-				case LogType.Warning:
-				case LogType.Assert:
-					logger.LogWarning(log);
-					return;
-				case LogType.Error:
-				case LogType.Exception:
-					logger.LogError(log);
-					return;
+				UIElements.IMGUIUI.ShowUI();
 			}
 		}
 
@@ -122,11 +144,13 @@ namespace ChoosyPreset
 
 			if (PresetPanelOpen && ViewMode == false)
 			{
-				myGUI.Enabled = true;
+				ToggleUIState(true);
+				//myGUI.Enabled = true;
 			}
 			else
 			{
-				myGUI.Enabled = false;
+				ToggleUIState(false);
+				//myGUI.Enabled = false;
 			}
 		}
 
@@ -138,11 +162,13 @@ namespace ChoosyPreset
 
 			if (PresetPanelOpen)
 			{
-				myGUI.Enabled = true;
+				ToggleUIState(true);
+				//myGUI.Enabled = true;
 			}
 			else
 			{
-				myGUI.Enabled = false;
+				ToggleUIState(false);
+				//myGUI.Enabled = false;
 			}
 		}
 
@@ -151,7 +177,8 @@ namespace ChoosyPreset
 		private static void ToView()
 		{
 			ViewMode = true;
-			myGUI.Enabled = false;
+			ToggleUIState(false);
+			//myGUI.Enabled = false;
 		}
 
 		[HarmonyPatch(typeof(SceneEdit), "OnDestroy")]
@@ -160,7 +187,8 @@ namespace ChoosyPreset
 		{
 			PresetPanelOpen = false;
 			ViewMode = false;
-			myGUI.Enabled = false;
+			ToggleUIState(false);
+			//myGUI.Enabled = false;
 		}
 
 		private static Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor> MaidColorsToKeepDic = new Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor>();
@@ -186,7 +214,7 @@ namespace ChoosyPreset
 				{
 					var colorName = Enum.GetName(typeof(MaidParts.PARTS_COLOR), k);
 
-					if (!myGUI.State.MPNStates[colorName])
+					if (!ItemStates.CurrentItemState.MPNStates[colorName])
 					{
 						MaidColorsToKeepDic[(MaidParts.PARTS_COLOR)k] = __0.Parts.GetPartsColor((MaidParts.PARTS_COLOR)k);
 					}
@@ -197,13 +225,13 @@ namespace ChoosyPreset
 			{
 				var MPN = (MPN)part.idx;
 
-				if (!myGUI.State.MPNStates[MPN.ToString()])
+				if (!ItemStates.CurrentItemState.MPNStates[MPN.ToString()])
 				{
 					__1.listMprop.Remove(part);
 				}
 			}
 
-			if (!myGUI.State.MPNStates["AddModsSlider Settings"])
+			if (!ItemStates.CurrentItemState.MPNStates["AddModsSlider Settings"])
 			{
 				__1.strFileName = "";
 			}
@@ -228,6 +256,21 @@ namespace ChoosyPreset
 			__1.listMprop = new List<MaidProp>(listofProps);
 
 			listofProps = null;
+		}
+
+		private static void ToggleUIState(bool enabled) 
+		{
+			try
+			{
+				//Main_UniLib.UIState = enabled;
+			}
+			catch (TypeLoadException t)
+			{
+			} 
+			catch 
+			{
+				
+			}
 		}
 	}
 }

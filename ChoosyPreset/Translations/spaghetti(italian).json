@@ -1,5 +1,9 @@
 {
 	"null_mpn": "Valore Nullo (Inutile)",
+	"Mixed": "Mixed",
+	"Off": "Off",
+	"On": "On",
+	"SearchText1": "Search:",
 	"SearchText": "Digita per filtrare...",
 	"Clothes": "Vestiti",
 	"Accesories": "Accessori",
