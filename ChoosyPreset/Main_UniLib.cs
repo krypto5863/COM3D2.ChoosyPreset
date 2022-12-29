@@ -9,11 +9,10 @@ namespace ChoosyPreset
 {
 	internal static class Main_UniLib
 	{
-
 		internal static UIBase uIBase;
 		internal static UIElements.MyGUI myGUI;
 
-		public static bool UIState 
+		public static bool UIState
 		{
 			get => myGUI.Enabled;
 			set => myGUI.Enabled = value;

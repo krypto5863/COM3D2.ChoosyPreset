@@ -51,7 +51,7 @@ namespace ChoosyPreset
 
 			foreach (var MPN in Categorized[category])
 			{
-				if (MPNStates[MPN]) 
+				if (MPNStates[MPN])
 				{
 					result = true;
 					continue;

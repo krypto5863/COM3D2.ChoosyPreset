@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace ChoosyPreset.UIElements
 {
-	class IMGUIUI
+	internal class IMGUIUI
 	{
 		private static readonly int WindowID = 387462387;
 		private static Vector2 scrollPosition = Vector2.zero;
@@ -30,7 +29,7 @@ namespace ChoosyPreset.UIElements
 
 		public static void ShowUI()
 		{
-			if (DoOnce == false) 
+			if (DoOnce == false)
 			{
 				new ItemStates();
 
@@ -64,7 +63,7 @@ namespace ChoosyPreset.UIElements
 			windowRect = GUI.Window(WindowID, windowRect, GuiWindowControls, "ChoosyPreset", MainWindow);
 		}
 
-		static void GuiWindowControls(int windowID)
+		private static void GuiWindowControls(int windowID)
 		{
 			GUI.DragWindow(new Rect(0, 0, 10000, 20));
 
@@ -75,15 +74,15 @@ namespace ChoosyPreset.UIElements
 
 			scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-			foreach (var kv in ItemStates.Categorized) 
+			foreach (var kv in ItemStates.Categorized)
 			{
 				if (!String.IsNullOrEmpty(SearchInput))
 				{
-					if (!Main.Translations[kv.Key].ToLower().Contains(SearchInput.ToLower()) && !kv.Key.ToLower().Contains(SearchInput.ToLower())) 
+					if (!Main.Translations[kv.Key].ToLower().Contains(SearchInput.ToLower()) && !kv.Key.ToLower().Contains(SearchInput.ToLower()))
 					{
 						var result = false;
 
-						foreach (string mpn in kv.Value) 
+						foreach (string mpn in kv.Value)
 						{
 							if (Main.Translations[mpn].ToLower().Contains(SearchInput.ToLower()) || mpn.ToLower().Contains(SearchInput.ToLower()))
 							{
@@ -92,7 +91,7 @@ namespace ChoosyPreset.UIElements
 							}
 						}
 
-						if (result == false) 
+						if (result == false)
 						{
 							continue;
 						}
@@ -106,13 +105,13 @@ namespace ChoosyPreset.UIElements
 
 				GUILayout.BeginHorizontal(Sections);
 
-				if (GUILayout.Button("☰")) 
+				if (GUILayout.Button("☰"))
 				{
 					if (ExpandedCategory.TryGetValue(kv.Key, out var val))
 					{
 						ExpandedCategory[kv.Key] = !ExpandedCategory[kv.Key];
 					}
-					else 
+					else
 					{
 						ExpandedCategory[kv.Key] = true;
 					}
@@ -122,12 +121,12 @@ namespace ChoosyPreset.UIElements
 				{
 					if (AnyOn)
 					{
-						foreach (string mpn in kv.Value) 
+						foreach (string mpn in kv.Value)
 						{
 							ItemStates.CurrentItemState.MPNStates[mpn] = false;
 						}
 					}
-					else 
+					else
 					{
 						foreach (string mpn in kv.Value)
 						{
@@ -149,13 +148,12 @@ namespace ChoosyPreset.UIElements
 				GUILayout.Label(status, status1);
 
 				GUILayout.EndHorizontal();
-				if (ExpandedCategory.TryGetValue(kv.Key, out var val1) && val1 == true) 
+				if (ExpandedCategory.TryGetValue(kv.Key, out var val1) && val1 == true)
 				{
 					GUILayout.BeginVertical(Sections2);
 
 					foreach (var mpn in kv.Value.OrderBy(tn => Main.Translations[tn]))
 					{
-
 						if (!String.IsNullOrEmpty(SearchInput) && !Main.Translations[mpn].ToLower().Contains(SearchInput.ToLower()) && !mpn.ToLower().Contains(SearchInput.ToLower()))
 						{
 							continue;
@@ -176,9 +174,9 @@ namespace ChoosyPreset.UIElements
 
 			if (GUILayout.Button(Main.Translations["Enable All"]))
 			{
-				foreach (var kv in ItemStates.Categorized) 
+				foreach (var kv in ItemStates.Categorized)
 				{
-					foreach (var cat in kv.Value) 
+					foreach (var cat in kv.Value)
 					{
 						ItemStates.CurrentItemState.MPNStates[cat] = true;
 					}

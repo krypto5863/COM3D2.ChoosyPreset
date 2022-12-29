@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Permissions;
-using UnityEngine;
 
 //These two lines tell your plugin to not give a flying fuck about accessing private variables/classes whatever. It requires a publicized stubb of the library with those private objects though.
 [module: UnverifiableCode]
@@ -30,6 +29,7 @@ namespace ChoosyPreset
 
 		//Config entry variable. You set your configs to this.
 		internal static ConfigEntry<string> LanguageFile;
+
 		//internal static ConfigEntry<bool> UsingUniLib;
 
 		public static bool PresetPanelOpen { get; private set; }
@@ -124,7 +124,27 @@ namespace ChoosyPreset
 			}*/
 
 			//Installs the patches in the Main class.
-			Harmony.CreateAndPatchAll(typeof(Main));
+			var harmony = Harmony.CreateAndPatchAll(typeof(Main));
+
+			try
+			{
+				var methodBase = typeof(CharacterMgr)
+					.GetMethods()
+					.Where(r => r.Name.Equals("PresetSet"))
+					.Aggregate((i1, i2) => i1.GetParameters().Count() < i2.GetParameters().Count() ? i1 : i2);
+
+				Main.logger.LogDebug($"Choosy has found method: {methodBase.FullDescription()}");
+
+				var prefix = new HarmonyMethod(typeof(Main), "PresetSet");
+				var postfix = new HarmonyMethod(typeof(Main), "PresetColorFix");
+
+				harmony.Patch(methodBase, prefix, postfix);
+			}
+			catch
+			{
+				Main.logger.LogFatal("Failed to patch the PresetSet function!");
+				harmony.UnpatchSelf();
+			}
 		}
 
 		private void OnGUI()
@@ -194,11 +214,11 @@ namespace ChoosyPreset
 		private static Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor> MaidColorsToKeepDic = new Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor>();
 		private static List<MaidProp> listofProps;
 
-		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", new Type[] { typeof(Maid), typeof(CharacterMgr.Preset) })]
-		[HarmonyPrefix]
+		//[HarmonyPatch(typeof(CharacterMgr), "PresetSet", new Type[] { typeof(Maid), typeof(CharacterMgr.Preset) })]
+		//[HarmonyPrefix]
 		private static bool PresetSet(Maid __0, ref CharacterMgr.Preset __1)
 		{
-			if (PresetPanelOpen == false) 
+			if (PresetPanelOpen == false)
 			{
 				return true;
 			}
@@ -239,8 +259,8 @@ namespace ChoosyPreset
 			return true;
 		}
 
-		[HarmonyPatch(typeof(CharacterMgr), "PresetSet", new Type[] { typeof(Maid), typeof(CharacterMgr.Preset) })]
-		[HarmonyPostfix]
+		//[HarmonyPatch(typeof(CharacterMgr), "PresetSet", new Type[] { typeof(Maid), typeof(CharacterMgr.Preset) }, new ArgumentType[] {  })]
+		//[HarmonyPostfix]
 		private static void PresetColorFix(Maid __0, ref CharacterMgr.Preset __1)
 		{
 			if (PresetPanelOpen == false)
@@ -258,7 +278,7 @@ namespace ChoosyPreset
 			listofProps = null;
 		}
 
-		private static void ToggleUIState(bool enabled) 
+		private static void ToggleUIState(bool enabled)
 		{
 			try
 			{
@@ -266,10 +286,9 @@ namespace ChoosyPreset
 			}
 			catch (TypeLoadException t)
 			{
-			} 
-			catch 
+			}
+			catch
 			{
-				
 			}
 		}
 	}
