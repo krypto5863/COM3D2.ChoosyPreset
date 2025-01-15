@@ -82,11 +82,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChoosyPreset.cs" />
     <Compile Include="UIElements\Helpers.cs" />
     <Compile Include="ItemStates.cs" />
-    <Compile Include="Main.cs" />
     <None Include="ParentChildToggle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Translations\ChineseSimplified.json" />
     <None Include="Translations\espanol.json" />
     <None Include="Translations\japanese.json" />
     <None Include="Translations\spaghetti%28italian%29.json" />

@@ -7,87 +7,139 @@ namespace ChoosyPreset.UIElements
 {
 	internal class IMGUIUI
 	{
-		private static readonly int WindowID = 387462387;
-		private static Vector2 scrollPosition = Vector2.zero;
+		private const int WindowId = 387462387;
+		private static Vector2 _scrollPosition = Vector2.zero;
 
-		private static Rect windowRect = new Rect(Screen.width / 1.25f, Screen.height / 8, Math.Max(Screen.width / 6f, 300f), Math.Max(Screen.height / 1.5f, 600f));
+		private static Rect _windowRect = new Rect(Screen.width / 1.25f, Screen.height / 8, Math.Max(Screen.width / 6f, 300f), Math.Max(Screen.height / 1.5f, 600f));
 
-		private static bool DoOnce = false;
+		private static bool _doOnce;
 
-		private static Dictionary<string, bool> ExpandedCategory = new Dictionary<string, bool>();
+		private static readonly Dictionary<string, bool> ExpandedCategory = new Dictionary<string, bool>();
+		
+		private static Texture2D _normalTexture;
+		private static Texture2D _hoverTexture;
+		private static Texture2D _onNormalTexture;
+		private static Texture2D _sectionsTexture;
+		private static Texture2D _sections2Texture;
 
-		private static GUIStyle MainWindow;
-		private static GUIStyle Sections;
-		private static GUIStyle Sections2;
+		private static GUIStyle _mainWindow;
+		private static GUIStyle _sections;
+		private static GUIStyle _sections2;
 
-		private static GUIStyle MixedText;
-		private static GUIStyle OffText;
-		private static GUIStyle OnText;
-		private static GUIStyle MPNText;
+		private static GUIStyle _mixedText;
+		private static GUIStyle _offText;
+		private static GUIStyle _onText;
+		private static GUIStyle _mpnText;
 
-		private static string SearchInput = String.Empty;
+		private static string _searchInput = string.Empty;
 
-		public static void ShowUI()
+		public static void ShowUi()
 		{
-			if (DoOnce == false)
+			if (_doOnce == false)
 			{
-				new ItemStates();
+				ItemStates.InitStates();
 
-				MainWindow = new GUIStyle(GUI.skin.window);
-				MainWindow.normal.background = UIElements.Helpers.MakeWindowTex(new Color(0.01f, 0.01f, 0.01f, 0.3f), new Color(0, 1, 0, 0.5f));
-				MainWindow.normal.textColor = new Color(1, 1, 1, 0.3f);
-				MainWindow.hover.background = UIElements.Helpers.MakeWindowTex(new Color(0.01f, 0.01f, 0.01f, 0.6f), new Color(0, 1, 0, 0.5f));
-				MainWindow.hover.textColor = new Color(1, 1, 1, 0.6f);
-				MainWindow.onNormal.background = UIElements.Helpers.MakeWindowTex(new Color(0.01f, 0.01f, 0.01f, 0.6f), new Color(0, 1, 0, 0.5f));
+				_normalTexture = Helpers.MakeWindowTex(new Color(0.01f, 0.01f, 0.01f, 0.3f), new Color(0, 1, 0, 0.5f));
+				_hoverTexture = Helpers.MakeWindowTex(new Color(0.01f, 0.01f, 0.01f, 0.6f), new Color(0, 1, 0, 0.5f));
+				_onNormalTexture = Helpers.MakeWindowTex(new Color(0.01f, 0.01f, 0.01f, 0.6f), new Color(0, 1, 0, 0.5f));
 
-				Sections = new GUIStyle(GUI.skin.box);
-				Sections.normal.background = UIElements.Helpers.MakeTex(2, 2, new Color(0, 0, 0, 0.3f));
-				Sections2 = new GUIStyle(GUI.skin.box);
-				Sections2.normal.background = UIElements.Helpers.MakeTexWithRoundedCorner(new Color(0, 0, 0, 0.6f));
+				_mainWindow = new GUIStyle(GUI.skin.window)
+				{
+					normal =
+					{
+						background = _normalTexture,
+						textColor = new Color(1, 1, 1, 0.3f)
+					},
+					hover =
+					{
+						background = _hoverTexture,
+						textColor = new Color(1, 1, 1, 0.6f)
+					},
+					onNormal =
+					{
+						background = _onNormalTexture
+					}
+				};
 
-				MixedText = new GUIStyle(GUI.skin.label);
-				MixedText.normal.textColor = Color.yellow;
+				_sectionsTexture = Helpers.MakeTex(2, 2, new Color(0, 0, 0, 0.3f));
 
-				OffText = new GUIStyle(GUI.skin.label);
-				OffText.normal.textColor = Color.red;
+				_sections = new GUIStyle(GUI.skin.box)
+				{
+					normal =
+					{
+						background = _sectionsTexture
+					}
+				};
 
-				OnText = new GUIStyle(GUI.skin.label);
-				OnText.normal.textColor = Color.green;
+				_sections2Texture = Helpers.MakeTexWithRoundedCorner(new Color(0, 0, 0, 0.6f));
 
-				MPNText = new GUIStyle(GUI.skin.toggle);
-				MPNText.richText = true;
+				_sections2 = new GUIStyle(GUI.skin.box)
+				{
+					normal =
+					{
+						background = _sections2Texture
+					}
+				};
 
-				DoOnce = true;
+				_mixedText = new GUIStyle(GUI.skin.label)
+				{
+					normal =
+					{
+						textColor = Color.yellow
+					}
+				};
+
+				_offText = new GUIStyle(GUI.skin.label)
+				{
+					normal =
+					{
+						textColor = Color.red
+					}
+				};
+
+				_onText = new GUIStyle(GUI.skin.label)
+				{
+					normal =
+					{
+						textColor = Color.green
+					}
+				};
+
+				_mpnText = new GUIStyle(GUI.skin.toggle)
+				{
+					richText = true
+				};
+
+				_doOnce = true;
 			}
 
-			windowRect = GUI.Window(WindowID, windowRect, GuiWindowControls, "ChoosyPreset", MainWindow);
+			_windowRect = GUI.Window(WindowId, _windowRect, GuiWindowControls, "ChoosyPreset", _mainWindow);
 		}
 
-		private static void GuiWindowControls(int windowID)
+		private static void GuiWindowControls(int windowId)
 		{
 			GUI.DragWindow(new Rect(0, 0, 10000, 20));
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(Main.Translations["SearchText1"]);
-			SearchInput = GUILayout.TextField(SearchInput, GUILayout.Width(160));
+			GUILayout.Label(ChoosyPreset.Translations["SearchText1"]);
+			_searchInput = GUILayout.TextField(_searchInput, GUILayout.Width(160));
 			GUILayout.EndHorizontal();
 
-			scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+			_scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
 
 			foreach (var kv in ItemStates.Categorized)
 			{
-				if (!String.IsNullOrEmpty(SearchInput))
+				if (!string.IsNullOrEmpty(_searchInput))
 				{
-					if (!Main.Translations[kv.Key].ToLower().Contains(SearchInput.ToLower()) && !kv.Key.ToLower().Contains(SearchInput.ToLower()))
+					if (!ChoosyPreset.Translations[kv.Key].ToLower().Contains(_searchInput.ToLower()) && !kv.Key.ToLower().Contains(_searchInput.ToLower()))
 					{
 						var result = false;
 
-						foreach (string mpn in kv.Value)
+						foreach (var mpn in kv.Value)
 						{
-							if (Main.Translations[mpn].ToLower().Contains(SearchInput.ToLower()) || mpn.ToLower().Contains(SearchInput.ToLower()))
+							if (ChoosyPreset.Translations[mpn].ToLower().Contains(_searchInput.ToLower()) || mpn.ToLower().Contains(_searchInput.ToLower()))
 							{
 								result = true;
-								continue;
 							}
 						}
 
@@ -98,16 +150,16 @@ namespace ChoosyPreset.UIElements
 					}
 				}
 
-				var AnyOn = ItemStates.CurrentItemState.IsAnyMPNOn(kv.Key);
-				var AnyOff = ItemStates.CurrentItemState.IsAnyMPNOff(kv.Key);
+				var anyOn = ItemStates.CurrentItemState.IsAnyMPNOn(kv.Key);
+				var anyOff = ItemStates.CurrentItemState.IsAnyMpnOff(kv.Key);
 
-				GUILayout.BeginVertical(Sections);
+				GUILayout.BeginVertical(_sections);
 
-				GUILayout.BeginHorizontal(Sections);
+				GUILayout.BeginHorizontal(_sections);
 
 				if (GUILayout.Button("☰"))
 				{
-					if (ExpandedCategory.TryGetValue(kv.Key, out var val))
+					if (ExpandedCategory.TryGetValue(kv.Key, out _))
 					{
 						ExpandedCategory[kv.Key] = !ExpandedCategory[kv.Key];
 					}
@@ -119,47 +171,47 @@ namespace ChoosyPreset.UIElements
 
 				if (GUILayout.Button("I/O"))
 				{
-					if (AnyOn)
+					if (anyOn)
 					{
-						foreach (string mpn in kv.Value)
+						foreach (var mpn in kv.Value)
 						{
-							ItemStates.CurrentItemState.MPNStates[mpn] = false;
+							ItemStates.CurrentItemState.MpnStates[mpn] = false;
 						}
 					}
 					else
 					{
-						foreach (string mpn in kv.Value)
+						foreach (var mpn in kv.Value)
 						{
-							ItemStates.CurrentItemState.MPNStates[mpn] = true;
+							ItemStates.CurrentItemState.MpnStates[mpn] = true;
 						}
 					}
 				}
 
-				GUILayout.Label(Main.Translations[kv.Key] + $":");
+				GUILayout.Label($"{ChoosyPreset.Translations[kv.Key]}:");
 
 				GUILayout.FlexibleSpace();
 
-				string status = AnyOn && AnyOff ? Main.Translations["Mixed"]
-					: AnyOff ? Main.Translations["Off"] : Main.Translations["On"];
+				var status = anyOn && anyOff ? ChoosyPreset.Translations["Mixed"]
+					: anyOff ? ChoosyPreset.Translations["Off"] : ChoosyPreset.Translations["On"];
 
-				var status1 = AnyOn && AnyOff ? MixedText
-					: AnyOff ? OffText : OnText;
+				var status1 = anyOn && anyOff ? _mixedText
+					: anyOff ? _offText : _onText;
 
 				GUILayout.Label(status, status1);
 
 				GUILayout.EndHorizontal();
-				if (ExpandedCategory.TryGetValue(kv.Key, out var val1) && val1 == true)
+				if (ExpandedCategory.TryGetValue(kv.Key, out var val1) && val1)
 				{
-					GUILayout.BeginVertical(Sections2);
+					GUILayout.BeginVertical(_sections2);
 
-					foreach (var mpn in kv.Value.OrderBy(tn => Main.Translations[tn]))
+					foreach (var mpn in kv.Value.OrderBy(tn => ChoosyPreset.Translations[tn]))
 					{
-						if (!String.IsNullOrEmpty(SearchInput) && !Main.Translations[mpn].ToLower().Contains(SearchInput.ToLower()) && !mpn.ToLower().Contains(SearchInput.ToLower()))
+						if (!string.IsNullOrEmpty(_searchInput) && !ChoosyPreset.Translations[mpn].ToLower().Contains(_searchInput.ToLower()) && !mpn.ToLower().Contains(_searchInput.ToLower()))
 						{
 							continue;
 						}
 
-						ItemStates.CurrentItemState.MPNStates[mpn] = GUILayout.Toggle(ItemStates.CurrentItemState.MPNStates[mpn], Main.Translations[mpn] + $" <i>(<color=#808080ff>{mpn}</color>)</i>", MPNText);
+						ItemStates.CurrentItemState.MpnStates[mpn] = GUILayout.Toggle(ItemStates.CurrentItemState.MpnStates[mpn], ChoosyPreset.Translations[mpn] + $" <i>(<color=#808080ff>{mpn}</color>)</i>", _mpnText);
 					}
 
 					GUILayout.EndVertical();
@@ -170,32 +222,32 @@ namespace ChoosyPreset.UIElements
 
 			GUILayout.EndScrollView();
 
-			GUILayout.BeginHorizontal(Sections);
+			GUILayout.BeginHorizontal(_sections);
 
-			if (GUILayout.Button(Main.Translations["Enable All"]))
+			if (GUILayout.Button(ChoosyPreset.Translations["Enable All"]))
 			{
 				foreach (var kv in ItemStates.Categorized)
 				{
 					foreach (var cat in kv.Value)
 					{
-						ItemStates.CurrentItemState.MPNStates[cat] = true;
+						ItemStates.CurrentItemState.MpnStates[cat] = true;
 					}
 				}
 			}
-			if (GUILayout.Button(Main.Translations["Disable All"]))
+			if (GUILayout.Button(ChoosyPreset.Translations["Disable All"]))
 			{
 				foreach (var kv in ItemStates.Categorized)
 				{
 					foreach (var cat in kv.Value)
 					{
-						ItemStates.CurrentItemState.MPNStates[cat] = false;
+						ItemStates.CurrentItemState.MpnStates[cat] = false;
 					}
 				}
 			}
 
 			GUILayout.EndHorizontal();
 
-			Helpers.ChkMouseClick(windowRect);
+			Helpers.ChkMouseClick(_windowRect);
 		}
 	}
 }
