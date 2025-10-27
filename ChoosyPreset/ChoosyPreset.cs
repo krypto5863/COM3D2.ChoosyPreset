@@ -223,6 +223,7 @@ namespace ChoosyPreset
 		
 		private static readonly Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor> MaidColorsToKeepDic = new Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor>();
 		private static List<MaidProp> _listOfProps;
+		private static string _presetFileName;
 
 		//[HarmonyPatch(typeof(CharacterMgr), nameof(CharacterMgr.PresetSet))]
 		//[HarmonyPrefix]
@@ -235,6 +236,7 @@ namespace ChoosyPreset
 
 			MaidColorsToKeepDic.Clear();
 			_listOfProps = new List<MaidProp>(__1.listMprop);
+			_presetFileName = __1.strFileName;
 
 			var props = __1.listMprop.ToArray();
 
@@ -284,6 +286,10 @@ namespace ChoosyPreset
 			}
 
 			__1.listMprop = new List<MaidProp>(_listOfProps);
+			// avoid restoring to an empty string, in case an earlier patch has done the same
+			if (_presetFileName != string.Empty) {
+				__1.strFileName = _presetFileName;
+			}
 
 			_listOfProps = null;
 		}
