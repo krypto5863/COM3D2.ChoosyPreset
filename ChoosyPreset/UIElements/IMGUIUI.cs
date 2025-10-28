@@ -146,10 +146,18 @@ namespace ChoosyPreset.UIElements
 
         private static void DrawCategory(string category, string[] mpns, string lowerCaseSearchInput)
         {
+            GUILayout.BeginVertical(_sections);
+
+            DrawCategoryCollapsible(category, mpns);
+            DrawCategoriesItems(category, mpns, lowerCaseSearchInput);
+
+            GUILayout.EndVertical();
+        }
+
+        private static void DrawCategoryCollapsible(string category, string[] mpns)
+        {
             var anyOn = ItemStates.CurrentItemState.IsAnyMPNOn(category);
             var anyOff = ItemStates.CurrentItemState.IsAnyMpnOff(category);
-
-            GUILayout.BeginVertical(_sections);
 
             GUILayout.BeginHorizontal(_sections);
 
@@ -196,9 +204,6 @@ namespace ChoosyPreset.UIElements
             GUILayout.Label(status, statusStyle);
 
             GUILayout.EndHorizontal();
-            DrawCategoriesItems(category, mpns, lowerCaseSearchInput);
-
-            GUILayout.EndVertical();
         }
 
         private static void DrawCategoriesItems(string category, string[] mpns, string lowerCaseSearchInput)
