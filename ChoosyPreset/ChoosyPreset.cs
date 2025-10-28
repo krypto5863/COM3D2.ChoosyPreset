@@ -287,7 +287,8 @@ namespace ChoosyPreset
 
 			__1.listMprop = new List<MaidProp>(_listOfProps);
 			// avoid restoring to an empty string, in case an earlier patch has done the same
-			if (_presetFileName != string.Empty) {
+			if (_presetFileName != string.Empty)
+			{
 				__1.strFileName = _presetFileName;
 			}
 
