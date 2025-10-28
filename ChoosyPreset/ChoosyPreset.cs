@@ -43,7 +43,13 @@ namespace ChoosyPreset
                 return;
             }
 
-            UIHooks.InstallHooks(new Harmony(Guid));
+            var harmony = new Harmony(Guid);
+            if (CoreHooks.InstallHooks(harmony) == false)
+            {
+                Harmony.UnpatchAll();
+                return;
+            }
+            UIHooks.InstallHooks(harmony);
         }
 
         private static void CreateChoosyPresetDirectory()

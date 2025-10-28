@@ -8,7 +8,7 @@ namespace ChoosyPreset.Hooks
 {
     internal static class CoreHooks
     {
-        internal static void InstallHooks(Harmony harmony)
+        internal static bool InstallHooks(Harmony harmony)
         {
             try
             {
@@ -16,16 +16,18 @@ namespace ChoosyPreset.Hooks
 #if DEBUG
                 Logger.LogDebug($"Choosy has found method: {methodBase.FullDescription()}");
 #endif
-                var prefix = new HarmonyMethod(typeof(ChoosyPreset), nameof(PresetSetPrefix));
-                var postfix = new HarmonyMethod(typeof(ChoosyPreset), nameof(PresetSetPostfix));
+                var prefix = new HarmonyMethod(typeof(CoreHooks), nameof(PresetSetPrefix));
+                var postfix = new HarmonyMethod(typeof(CoreHooks), nameof(PresetSetPostfix));
 
                 harmony.Patch(presetSetMethod, prefix, postfix);
             }
             catch
             {
                 ChoosyPreset.Logger.LogFatal("Failed to patch the PresetSet function!");
-                harmony.UnpatchSelf();
+                return false;
             }
+
+            return true;
         }
 
         private static readonly Dictionary<MaidParts.PARTS_COLOR, MaidParts.PartsColor> MaidColorsToKeepDic =
