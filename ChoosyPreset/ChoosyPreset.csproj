@@ -83,19 +83,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChoosyPreset.cs" />
+    <Compile Include="Hooks\CoreHooks.cs" />
     <Compile Include="UIElements\Helpers.cs" />
     <Compile Include="ItemStates.cs" />
-    <None Include="ParentChildToggle.cs" />
+    <Compile Include="Hooks\UIHooks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Translations\ChineseSimplified.json" />
     <None Include="Translations\espanol.json" />
     <None Include="Translations\japanese.json" />
     <None Include="Translations\spaghetti%28italian%29.json" />
     <Compile Include="UIElements\IMGUIUI.cs" />
-    <None Include="Main_UniLib.cs" />
-    <None Include="UIElements\ParentChildToggle.cs" />
-    <None Include="UIElements\UniverseLibUI.cs" />
-    <None Include="UniverseLibUI.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

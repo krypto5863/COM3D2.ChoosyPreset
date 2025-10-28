@@ -29,7 +29,7 @@ namespace ChoosyPreset
 
         public Dictionary<string, bool> MpnStates = new Dictionary<string, bool>();
 
-        public static readonly Dictionary<string, string[]> Categorized = new Dictionary<string, string[]>
+        public static readonly Dictionary<string, string[]> CategoriesMpn = new Dictionary<string, string[]>
         {
             {"Clothes", new[]{"wear","skirt","mizugi","bra","panz","stkg","shoes","headset","onepiece", "acchat"} },
 
@@ -54,7 +54,7 @@ namespace ChoosyPreset
         {
             var result = false;
 
-            foreach (var mpn in Categorized[category])
+            foreach (var mpn in CategoriesMpn[category])
             {
                 if (MpnStates[mpn])
                 {
@@ -69,7 +69,7 @@ namespace ChoosyPreset
         {
             var result = false;
 
-            foreach (var mpn in Categorized[category])
+            foreach (var mpn in CategoriesMpn[category])
             {
                 if (MpnStates[mpn] == false)
                 {

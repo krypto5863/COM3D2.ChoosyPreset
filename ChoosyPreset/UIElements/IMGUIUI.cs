@@ -12,7 +12,7 @@ namespace ChoosyPreset.UIElements
 
         private static Rect _windowRect = new Rect(Screen.width / 1.25f, Screen.height / 8, Math.Max(Screen.width / 6f, 300f), Math.Max(Screen.height / 1.5f, 600f));
 
-        private static bool _doOnce;
+        private static bool _guiInitialized;
 
         private static readonly Dictionary<string, bool> ExpandedCategory = new Dictionary<string, bool>();
 
@@ -35,7 +35,7 @@ namespace ChoosyPreset.UIElements
 
         public static void ShowUi()
         {
-            if (_doOnce == false)
+            if (_guiInitialized == false)
             {
                 ItemStates.InitStates();
 
@@ -110,144 +110,186 @@ namespace ChoosyPreset.UIElements
                     richText = true
                 };
 
-                _doOnce = true;
+                _guiInitialized = true;
             }
 
-            _windowRect = GUI.Window(WindowId, _windowRect, GuiWindowControls, "ChoosyPreset", _mainWindow);
+            _windowRect = GUI.Window(WindowId, _windowRect, DrawWindow, "ChoosyPreset", _mainWindow);
         }
 
-        private static void GuiWindowControls(int windowId)
+        private static void DrawWindow(int windowId)
         {
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(ChoosyPreset.Translations["SearchText1"]);
-            _searchInput = GUILayout.TextField(_searchInput, GUILayout.Width(160));
-            GUILayout.EndHorizontal();
+            var lowerCaseSearchInput = DrawSearchBar();
 
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
 
-            foreach (var kv in ItemStates.Categorized)
+            foreach (var categoriesMpns in ItemStates.CategoriesMpn)
             {
-                if (!string.IsNullOrEmpty(_searchInput))
+                var category = categoriesMpns.Key;
+                var mpns = categoriesMpns.Value;
+
+                if (FilterCategoriesBySearchInput(lowerCaseSearchInput, categoriesMpns) == false)
                 {
-                    if (!ChoosyPreset.Translations[kv.Key].ToLower().Contains(_searchInput.ToLower()) && !kv.Key.ToLower().Contains(_searchInput.ToLower()))
-                    {
-                        var result = false;
-
-                        foreach (var mpn in kv.Value)
-                        {
-                            if (ChoosyPreset.Translations[mpn].ToLower().Contains(_searchInput.ToLower()) || mpn.ToLower().Contains(_searchInput.ToLower()))
-                            {
-                                result = true;
-                            }
-                        }
-
-                        if (result == false)
-                        {
-                            continue;
-                        }
-                    }
+                    continue;
                 }
 
-                var anyOn = ItemStates.CurrentItemState.IsAnyMPNOn(kv.Key);
-                var anyOff = ItemStates.CurrentItemState.IsAnyMpnOff(kv.Key);
-
-                GUILayout.BeginVertical(_sections);
-
-                GUILayout.BeginHorizontal(_sections);
-
-                if (GUILayout.Button("☰"))
-                {
-                    if (ExpandedCategory.TryGetValue(kv.Key, out _))
-                    {
-                        ExpandedCategory[kv.Key] = !ExpandedCategory[kv.Key];
-                    }
-                    else
-                    {
-                        ExpandedCategory[kv.Key] = true;
-                    }
-                }
-
-                if (GUILayout.Button("I/O"))
-                {
-                    if (anyOn)
-                    {
-                        foreach (var mpn in kv.Value)
-                        {
-                            ItemStates.CurrentItemState.MpnStates[mpn] = false;
-                        }
-                    }
-                    else
-                    {
-                        foreach (var mpn in kv.Value)
-                        {
-                            ItemStates.CurrentItemState.MpnStates[mpn] = true;
-                        }
-                    }
-                }
-
-                GUILayout.Label($"{ChoosyPreset.Translations[kv.Key]}:");
-
-                GUILayout.FlexibleSpace();
-
-                var status = anyOn && anyOff ? ChoosyPreset.Translations["Mixed"]
-                    : anyOff ? ChoosyPreset.Translations["Off"] : ChoosyPreset.Translations["On"];
-
-                var status1 = anyOn && anyOff ? _mixedText
-                    : anyOff ? _offText : _onText;
-
-                GUILayout.Label(status, status1);
-
-                GUILayout.EndHorizontal();
-                if (ExpandedCategory.TryGetValue(kv.Key, out var val1) && val1)
-                {
-                    GUILayout.BeginVertical(_sections2);
-
-                    foreach (var mpn in kv.Value.OrderBy(tn => ChoosyPreset.Translations[tn]))
-                    {
-                        if (!string.IsNullOrEmpty(_searchInput) && !ChoosyPreset.Translations[mpn].ToLower().Contains(_searchInput.ToLower()) && !mpn.ToLower().Contains(_searchInput.ToLower()))
-                        {
-                            continue;
-                        }
-
-                        ItemStates.CurrentItemState.MpnStates[mpn] = GUILayout.Toggle(ItemStates.CurrentItemState.MpnStates[mpn], ChoosyPreset.Translations[mpn] + $" <i>(<color=#808080ff>{mpn}</color>)</i>", _mpnText);
-                    }
-
-                    GUILayout.EndVertical();
-                }
-
-                GUILayout.EndVertical();
+                DrawCategory(category, mpns, lowerCaseSearchInput);
             }
 
             GUILayout.EndScrollView();
 
+            DrawFooterButtons();
+
+            Helpers.ChkMouseClick(_windowRect);
+        }
+
+        private static void DrawCategory(string category, string[] mpns, string lowerCaseSearchInput)
+        {
+            var anyOn = ItemStates.CurrentItemState.IsAnyMPNOn(category);
+            var anyOff = ItemStates.CurrentItemState.IsAnyMpnOff(category);
+
+            GUILayout.BeginVertical(_sections);
+
+            GUILayout.BeginHorizontal(_sections);
+
+            if (GUILayout.Button("☰"))
+            {
+                if (ExpandedCategory.TryGetValue(category, out _))
+                {
+                    ExpandedCategory[category] = !ExpandedCategory[category];
+                }
+                else
+                {
+                    ExpandedCategory[category] = true;
+                }
+            }
+
+            if (GUILayout.Button("I/O"))
+            {
+                if (anyOn)
+                {
+                    foreach (var mpn in mpns)
+                    {
+                        ItemStates.CurrentItemState.MpnStates[mpn] = false;
+                    }
+                }
+                else
+                {
+                    foreach (var mpn in mpns)
+                    {
+                        ItemStates.CurrentItemState.MpnStates[mpn] = true;
+                    }
+                }
+            }
+
+            GUILayout.Label($"{ChoosyPreset.Translations[category]}:");
+
+            GUILayout.FlexibleSpace();
+
+            var status = anyOn && anyOff ? ChoosyPreset.Translations["Mixed"]
+                : anyOff ? ChoosyPreset.Translations["Off"] : ChoosyPreset.Translations["On"];
+
+            var statusStyle = anyOn && anyOff ? _mixedText
+                : anyOff ? _offText : _onText;
+
+            GUILayout.Label(status, statusStyle);
+
+            GUILayout.EndHorizontal();
+            DrawCategoriesItems(category, mpns, lowerCaseSearchInput);
+
+            GUILayout.EndVertical();
+        }
+
+        private static void DrawCategoriesItems(string category, string[] mpns, string lowerCaseSearchInput)
+        {
+            if (!ExpandedCategory.TryGetValue(category, out var categoryExpanded))
+            {
+                return;
+            }
+
+            if (!categoryExpanded)
+            {
+                return;
+            }
+
+            GUILayout.BeginVertical(_sections2);
+
+            foreach (var mpn in mpns.OrderBy(tn => ChoosyPreset.Translations[tn]))
+            {
+                var searchInputNotBlankAndDoesNotMatchSearch = !string.IsNullOrEmpty(lowerCaseSearchInput) && !ChoosyPreset.Translations[mpn].ToLower().Contains(lowerCaseSearchInput) && !mpn.ToLower().Contains(lowerCaseSearchInput);
+                if (searchInputNotBlankAndDoesNotMatchSearch)
+                {
+                    continue;
+                }
+
+                ItemStates.CurrentItemState.MpnStates[mpn] = GUILayout.Toggle(ItemStates.CurrentItemState.MpnStates[mpn], ChoosyPreset.Translations[mpn] + $" <i>(<color=#808080ff>{mpn}</color>)</i>", _mpnText);
+            }
+
+            GUILayout.EndVertical();
+        }
+
+        private static void DrawFooterButtons()
+        {
             GUILayout.BeginHorizontal(_sections);
 
             if (GUILayout.Button(ChoosyPreset.Translations["Enable All"]))
             {
-                foreach (var kv in ItemStates.Categorized)
-                {
-                    foreach (var cat in kv.Value)
-                    {
-                        ItemStates.CurrentItemState.MpnStates[cat] = true;
-                    }
-                }
+                SetStateOfAll(true);
             }
             if (GUILayout.Button(ChoosyPreset.Translations["Disable All"]))
             {
-                foreach (var kv in ItemStates.Categorized)
-                {
-                    foreach (var cat in kv.Value)
-                    {
-                        ItemStates.CurrentItemState.MpnStates[cat] = false;
-                    }
-                }
+                SetStateOfAll(false);
             }
 
             GUILayout.EndHorizontal();
+        }
 
-            Helpers.ChkMouseClick(_windowRect);
+        private static void SetStateOfAll(bool state)
+        {
+            foreach (var kv in ItemStates.CategoriesMpn)
+            {
+                foreach (var cat in kv.Value)
+                {
+                    ItemStates.CurrentItemState.MpnStates[cat] = state;
+                }
+            }
+        }
+
+        private static bool FilterCategoriesBySearchInput(string lowerCaseSearchInput, KeyValuePair<string, string[]> categoriesMpn)
+        {
+            if (string.IsNullOrEmpty(lowerCaseSearchInput))
+            {
+                return true;
+            }
+
+            if (ChoosyPreset.Translations[categoriesMpn.Key].ToLower().Contains(lowerCaseSearchInput) ||
+                categoriesMpn.Key.ToLower().Contains(lowerCaseSearchInput))
+            {
+                return true;
+            }
+
+            foreach (var mpn in categoriesMpn.Value)
+            {
+                if (ChoosyPreset.Translations[mpn].ToLower().Contains(lowerCaseSearchInput) || mpn.ToLower().Contains(lowerCaseSearchInput))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string DrawSearchBar()
+        {
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Label(ChoosyPreset.Translations["SearchText1"]);
+            _searchInput = GUILayout.TextField(_searchInput, GUILayout.Width(160));
+            GUILayout.EndHorizontal();
+
+            var lowerCaseSearchInput = _searchInput.ToLower();
+            return lowerCaseSearchInput;
         }
     }
 }
