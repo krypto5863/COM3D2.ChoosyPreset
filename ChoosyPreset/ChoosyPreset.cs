@@ -23,7 +23,7 @@ namespace ChoosyPreset
 	{
 		public const string Guid = "org.krypto5863.com3d2.choosypreset";
 		public const string Name = "ChoosyPreset";
-		public const string Version = "3.1";
+		public const string Version = "3.1.1";
 
 		//static saving of the main instance. This makes it easier to run stuff like coroutines from static methods or accessing non-static vars.
 		public static ChoosyPreset Instance;
